@@ -55,6 +55,15 @@ public class ConsistentHashing {
         return new String[]{String.valueOf(hash_key), servers.put(hash_key, s)};
     }
 
+    public static void addServersEqually(String[] serverList) {
+        int step = Integer.MAX_VALUE / serverList.length;
+        int hash_key = 0;
+        for (String server : serverList) {
+            servers.put(hash_key, server);
+            hash_key += step;
+        }
+    }
+
     public static String removeServer(String s) {
         int hash_key = getHash(s);
         return servers.remove(hash_key);
@@ -86,21 +95,29 @@ public class ConsistentHashing {
                 "192.168.0.120"
         };
 
-        //ConsistentHashing ch = new ConsistentHashing();
+        int distribution = args.length == 0 ? 1 : Integer.parseInt(args[0]);
 
-        for (String s: serverList) {
-            String[] res = addServer(s);
-            if (res[1] != null) {
-                if (s.equals(res[1]))
-                    System.out.println("Server {" + s + "} already exists");
+
+        if (distribution == 1) {
+            addServersEqually(serverList);
+            System.out.println("Servers were added equally");
+        }
+        else {
+            for (String s: serverList) {
+                String[] res = addServer(s);
+                if (res[1] != null) {
+                    if (s.equals(res[1]))
+                        System.out.println("Server {" + s + "} already exists");
+                    else {
+                        System.out.println("Server {" + s + "} replaced another server {" + res[1] + "} due to hash_id collision!!!");
+                    }
+                }
                 else {
-                    System.out.println("Server {" + s + "} replaced another server {" + res[1] + "} due to hash_id collision!!!");
+                    System.out.println("Server {" + s + "} added under hash_id: " + res[0]);
                 }
             }
-            else {
-                System.out.println("Server {" + s + "} added under hash_id: " + res[0]);
-            }
         }
+
 
 
         // generate random websites
