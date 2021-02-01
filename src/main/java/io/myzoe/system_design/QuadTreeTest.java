@@ -15,7 +15,7 @@ public class QuadTreeTest {
 
     public static void main(String[] args) {
         Random r = new Random();
-        int n = 10000;
+        int n = 1_000_000;
         int cap = 4;
         long x0 = 0;
         long y0 = 0;
@@ -93,7 +93,7 @@ public class QuadTreeTest {
             g2.setPaint(STARS);
 
             List<SpatialObject> res = quadTree.getAll();
-            int r = 2;
+            int r = 1;
             for (SpatialObject so : res) {
                 g2.drawOval((int)so.getLongitude()-r,(int)so.getLatitude()-r,r,r);
             }

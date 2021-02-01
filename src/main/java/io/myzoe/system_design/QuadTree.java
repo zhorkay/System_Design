@@ -39,9 +39,9 @@ public class QuadTree {
         return res;
     }
 
-    public boolean remove(SpatialObject obj) {
-        boolean res = this.root.remove(obj);
-        if (res) {
+    public SpatialObject remove(SpatialObject obj) {
+        SpatialObject res = this.root.remove(obj);
+        if (res != null) {
             this.size--;
         }
         return res;
@@ -66,7 +66,7 @@ public class QuadTree {
         private long ybottom;
         private boolean leafnode;
 
-        private ConcurrentHashMap<SpatialObject, Integer> locations;
+        private ConcurrentHashMap<SpatialObject, SpatialObject> locations;
 
         private QuadTreeNode nw;
         private QuadTreeNode ne;
@@ -108,10 +108,7 @@ public class QuadTree {
         }
 
         public boolean put(SpatialObject obj) {
-            if (obj.getLongitude() >= (double)xright ||
-                    obj.getLongitude() < (double)xleft ||
-                    obj.getLatitude() >= (double)ytop ||
-                    obj.getLatitude() < (double)ybottom) {
+            if (!obj.intersect(this.xleft, this.ybottom, this.xright, this.ytop)) {
                 return false;
             }
 
@@ -122,27 +119,41 @@ public class QuadTree {
                 return nw.put(obj) || ne.put(obj) || sw.put(obj) || se.put(obj);
             }
 
-            return this.locations.put(obj, 0) == null;
+            this.locations.put(obj, obj);
+            return true;
         }
 
-        public boolean remove(SpatialObject obj) {
-            if (obj.getLongitude() >= (double)xright ||
-                    obj.getLongitude() < (double)xleft ||
-                    obj.getLatitude() >= (double)ytop ||
-                    obj.getLatitude() < (double)ybottom) {
-                return false;
+        public SpatialObject remove(SpatialObject obj) {
+            if (!obj.intersect(this.xleft, this.ybottom, this.xright, this.ytop)) {
+                return null;
             }
 
-            if (this.locations.remove(obj) != null) {
-                return true;
+            SpatialObject res = this.locations.remove(obj);
+            if (res != null) {
+                return res;
             }
 
             if (this.leafnode) {
-                return false;
+                return null;
             }
 
-            return nw.remove(obj) || ne.remove(obj) || sw.remove(obj) || se.remove(obj);
+            res = nw.remove(obj);
+            if (res != null) {
+                return res;
+            }
 
+            res = ne.remove(obj);
+            if (res != null) {
+                return res;
+            }
+
+            res = sw.remove(obj);
+            if (res != null) {
+                return res;
+            }
+
+            res = se.remove(obj);
+            return res;
         }
 
         public void getAll(List<SpatialObject> res) {
