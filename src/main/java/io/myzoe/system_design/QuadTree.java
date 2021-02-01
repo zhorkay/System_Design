@@ -3,6 +3,7 @@ package io.myzoe.system_design;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class QuadTree {
@@ -65,7 +66,7 @@ public class QuadTree {
         private long ybottom;
         private boolean leafnode;
 
-        private HashSet<SpatialObject> locations;
+        private ConcurrentHashMap<SpatialObject, Integer> locations;
 
         private QuadTreeNode nw;
         private QuadTreeNode ne;
@@ -77,7 +78,7 @@ public class QuadTree {
             this.ytop = ytop;
             this.xleft = xleft;
             this.ybottom = ybottom;
-            this.locations = new HashSet<>();
+            this.locations = new ConcurrentHashMap<>();
             this.leafnode = true;
         }
 
@@ -121,7 +122,7 @@ public class QuadTree {
                 return nw.put(obj) || ne.put(obj) || sw.put(obj) || se.put(obj);
             }
 
-            return this.locations.add(obj);
+            return this.locations.put(obj, 0) == null;
         }
 
         public boolean remove(SpatialObject obj) {
@@ -132,7 +133,7 @@ public class QuadTree {
                 return false;
             }
 
-            if (this.locations.remove(obj)) {
+            if (this.locations.remove(obj) != null) {
                 return true;
             }
 
@@ -145,7 +146,7 @@ public class QuadTree {
         }
 
         public void getAll(List<SpatialObject> res) {
-            res.addAll(this.locations);
+            res.addAll(this.locations.keySet());
             if (!this.leafnode) {
                 this.nw.getAll(res);
                 this.ne.getAll(res);
@@ -166,7 +167,7 @@ public class QuadTree {
 
         public void getIntersect(List<SpatialObject> res, double x0, double y0, double x1, double y1) {
             if (intersect(x0, y0, x1, y1)) {
-                this.locations.forEach(loc -> {
+                this.locations.forEach((loc,val) -> {
                     if (loc.intersect(x0, y0, x1, y1)) {
                         res.add(loc);
                     }
