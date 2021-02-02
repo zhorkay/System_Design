@@ -3,6 +3,7 @@ package io.myzoe.system_design.uber;
 import io.myzoe.system_design.QuadTree;
 import io.myzoe.system_design.SpatialObject;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class UberTest {
@@ -18,6 +19,7 @@ public class UberTest {
 
         QuadTree qt = new QuadTree(cap, x0, y0, x1, y1);
 
+        Ride[] rides = new Ride[D];
         for (int i = 0; i < D; i++) {
             Driver d = new Driver(2*D+i, "car_"+ 2*D+i, "firstname_" + 2*D+i, "lastname_" + 2*D+i);
             d.setStatus(DriverStatus.STAND_BY);
@@ -30,12 +32,7 @@ public class UberTest {
             Ride ride = new Ride(i, p);
             ride.setDriver(d);
             qt.put(ride);
-//            SpatialObject so = qt.remove(new Ride(i, p));
-//            if (so != null) {
-//                Ride rd1 = (Ride)so;
-//                System.out.println(rd1.getDriver().getDriverId());
-//                //return;
-//            }
+            rides[i] = ride;
         }
 
         System.out.println(qt.getSize());
@@ -45,7 +42,8 @@ public class UberTest {
         int len = D / T;
         long SEC = 5;
         for (int i = 0; i < T; i++) {
-            RideJob rj = new RideJob(i * len, (i+1) * len, SEC, qt);
+            RideJob rj = new RideJob(i * len, (i+1) * len, SEC, qt, Arrays.copyOfRange(rides, i * len, (i+1) * len));
+
             Thread threadRideJob = new Thread(rj);
             threadRideJob.start();
         }
