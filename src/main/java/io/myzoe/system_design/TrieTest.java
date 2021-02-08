@@ -9,8 +9,7 @@ import java.util.Scanner;
 public class TrieTest {
     public static void main(String[] args) {
         String fileName = "D:/Workspaces/Projects/System_Design/src/main/resources/words.txt";
-
-
+        
         Random r = new Random();
         int R = 256;
         int RANK = 1_000_000_000;
